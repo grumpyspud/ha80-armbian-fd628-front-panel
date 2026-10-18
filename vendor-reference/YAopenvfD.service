@@ -1,0 +1,21 @@
+[Unit]
+Description=Yet Another openvfd Daemon
+#After=suspend.target
+After=etc-yaopenvfd.mount usr-lib-yaopenvfd.mount
+Wants=network-online.target
+ConditionPathExists=/usr/share/service/openvfd_env
+
+[Service]
+Type=simple
+EnvironmentFile=/usr/share/service/openvfd_env
+ExecCondition=/usr/bin/openvfd_chk
+#ExecStartPre=-/usr/sbin/rmmod -f openvfd
+ExecStart=/bin/sh -c 'export $(cat /usr/share/service/openvfd_env); . /etc/conf.d/YAopenvfD.conf; /usr/sbin/modprobe openvfd "vfd_gpio_clk=$${vfd_gpio_clk}" "vfd_gpio_dat=$${vfd_gpio_dat}" "vfd_gpio_stb=$${vfd_gpio_stb:-0,0,0xFF}" "vfd_gpio0=$${vfd_gpio0:-0,0,0xFF}" "vfd_gpio1=$${vfd_gpio1:-0,0,0xFF}" "vfd_gpio2=$${vfd_gpio2:-0,0,0xFF}" "vfd_gpio3=$${vfd_gpio3:-0,0,0xFF}" "vfd_gpio_protocol=$${vfd_gpio_protocol:-0,0}" "vfd_chars=$${vfd_chars}" "vfd_dot_bits=$${vfd_dot_bits}" "vfd_display_type=$${vfd_display_type}"; /usr/bin/YAopenvfD -s -c /etc/conf.d/reporter.conf $${YAopenvfD_args};'
+ExecStartPost=/bin/sh -c "/usr/bin/led_status load delay;  sleep 3; . /etc/conf.d/YAopenvfD.conf;"
+ExecStop=/bin/sh -c "/usr/bin/led_status save; /usr/bin/killall YAopenvfD"
+ExecStopPost=/usr/sbin/rmmod -f openvfd
+#Restart=on-failure
+#RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target

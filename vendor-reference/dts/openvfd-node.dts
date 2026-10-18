@@ -1,0 +1,13 @@
+/* Excerpt from the vendor device tree (rk3566-x88pro20.dtb), decompiled with dtc -I dtb -O dts.
+ *
+ * Worth including because of what it does NOT contain: there are no GPIO properties.
+ * The panel's pins are supplied from userspace (see ../YAopenvfD.conf, whose values the
+ * vendor's systemd unit passes to modprobe as module arguments). This is why reading the
+ * device tree alone will never tell you how the front display is wired.
+ */
+
+	openvfd {
+		compatible = "open,vfd";
+		dev_name = "openvfd";
+		status = "okay";
+	};

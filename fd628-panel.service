@@ -1,0 +1,14 @@
+[Unit]
+Description=Front-panel display (FD628 userspace driver)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/fd628-panel
+Restart=always
+RestartSec=3
+Environment=PANEL_BRIGHTNESS=5
+
+[Install]
+WantedBy=multi-user.target

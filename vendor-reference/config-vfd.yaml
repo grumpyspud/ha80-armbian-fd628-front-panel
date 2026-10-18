@@ -1,0 +1,108 @@
+widgets:
+  time_24h:
+    name: time_24h
+    type: date
+    delay: 20
+    value: 24h
+    led: ""
+  time_12h:
+    name: time_12h
+    type: date
+    delay: 20
+    value: 12h
+    led: ""
+  date_y:
+    name: date_y
+    type: date
+    delay: 5
+    value: year
+    led: ""
+  date_ym:
+    name: date_ym
+    type: date
+    delay: 5
+    value: year_month
+    led: ""
+  date_my:
+    name: date_my
+    type: date
+    delay: 5
+    value: month_year
+    led: ""
+  date_md:
+    name: date_md
+    type: date
+    delay: 5
+    value: month_day
+    led: ""
+  date_dm:
+    name: date_dm
+    type: date
+    delay: 5
+    value: day_month
+    led: ""
+  date_wd:
+    name: date_wd
+    type: date
+    delay: 5
+    value: weekday
+    led: ""
+  cpu_load:
+    name: cpu_load
+    type: cpu
+    delay: 5
+    value: ""
+    led: ""
+  temp_load:
+    name: temp_load
+    type: temp
+    delay: 5
+    value: 0
+    led: ""
+  text_lan_ip:
+    name: text_lan_ip
+    type: string
+    delay: 10
+    value: "LAN:IP:{{LAN_IP}}:::"
+    led: ""
+  text_lan_gw:
+    name: text_lan_gw
+    type: string
+    delay: 10
+    value: "LAN:GAtE:{{LAN_GW}}:::"
+    led: ""
+  text_wlan_ip:
+    name: text_wlan_ip
+    type: string
+    delay: 10
+    value: "uLAN:IP:{{WLAN_IP}}:::"
+    led: ""
+  text_wlan_gw:
+    name: text_wlan_gw
+    type: string
+    delay: 10
+    value: "uLAN:GAtE:{{WLAN_GW}}:::"
+    led: ""
+display:
+  - id: time_24h
+    time: 20
+  - id: cpu_load
+    time: 5
+  - id: temp_load
+    time: 5
+  - id: time_24h
+    time: 10
+  - id: text_lan_ip
+    check_vars: 
+      - LAN_IP
+    time: 25
+  - id: text_wlan_ip
+    check_vars: 
+      - WLAN_IP
+    time: 25
+  - id: time_24h
+    time: 20
+  - id: date_y
+    time: 5
+  - id: date_md
+    time: 5

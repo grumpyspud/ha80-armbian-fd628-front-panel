@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Front-panel clock: time + link icons, for an FD628 panel.
+
+  boot : 'boot' -> 'rdy' so a glance tells you it came up
+  idle : HH:MM clock with a blinking colon, power icon on, ethernet/wifi icon lit to
+         match whichever link is actually up
+
+Deliberately clock-and-icons only. A 4-digit panel cannot render a legible system
+label - decide content with the panel in front of you, not on paper.
+
+Runs as root under systemd (it needs the GPIO character device). Pure userspace, so
+no kernel module and nothing to rebuild when the kernel updates.
+"""
+
+import os
+import sys
+import time
+
+sys.path.insert(0, "/usr/local/lib/fd628")
+
+from fd628 import FD628, ICON_COLON, ICON_ETH, ICON_POWER, ICON_WIFI
+
+BRIGHTNESS = int(os.environ.get("PANEL_BRIGHTNESS", "5"))
+TICK = 0.5
+REFRESH = 2.0
+BOOT_HOLD = 4.0
+READY_HOLD = 2.0
+
+
+def read_str(path, default=""):
+    try:
+        with open(path) as handle:
+            return handle.read().strip()
+    except OSError:
+        return default
+
+
+def link_up(*prefixes):
+    """True if any interface starting with those prefixes has carrier."""
+    try:
+        names = os.listdir("/sys/class/net")
+    except OSError:
+        return False
+    for name in names:
+        if name.startswith(prefixes) and read_str(f"/sys/class/net/{name}/carrier") == "1":
+            return True
+    return False
+
+
+def status_icons():
+    icons = ICON_POWER
+    if link_up("end", "eth"):
+        icons |= ICON_ETH
+    if link_up("wlan"):
+        icons |= ICON_WIFI
+    return icons
+
+
+def main():
+    panel = FD628(brightness=BRIGHTNESS)
+
+    panel.show("boot", icons=ICON_POWER)
+    time.sleep(BOOT_HOLD)
+    panel.show("rdy", icons=status_icons())
+    time.sleep(READY_HOLD)
+
+    last_state = None
+    last_write = 0.0
+    while True:
+        try:
+            # Four DIGITS plus the colon ICON - never a ':' character in the text: the
+            # panel has 4 digits and a colon icon between positions 2 and 3, so "21:48"
+            # must be sent as "2148" (a ':' is not a glyph and blanks a digit).
+            colon = (time.time() % 2) < 1.0
+            text = time.strftime("%H%M")
+            icons = status_icons() | (ICON_COLON if colon else 0)
+            state = (text, icons)
+
+            # Rewrite on change, and also on a slow timer so a frame that latched only
+            # partially heals itself instead of staying wrong.
+            if state != last_state or (time.time() - last_write) >= REFRESH:
+                ram = panel.show(text, icons=icons)
+                if state != last_state:
+                    print("frame %r icons=0x%02x ram=%s"
+                          % (text, icons, " ".join("%02x" % b for b in ram)),
+                          flush=True)
+                last_state = state
+                last_write = time.time()
+
+            time.sleep(TICK)
+        except Exception as exc:                      # never die on a transient error
+            print(f"panel loop error: {exc}", file=sys.stderr, flush=True)
+            time.sleep(2)
+
+
+if __name__ == "__main__":
+    main()
