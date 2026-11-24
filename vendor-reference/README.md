@@ -20,10 +20,8 @@ first time.
 | `YAopenvfD.service` | Shows *how* the pins are passed: as `modprobe` arguments from that config, not from the device tree. |
 | `config-vfd.yaml` | The display's rotation: time 24h → CPU → temp → LAN IP → gateway → date. |
 | `dts/openvfd-node.dts` | The device tree node, decompiled from the vendor DTB. Note it has **no GPIO properties at all**. |
-| `binaries/openvfd.ko` | The vendor kernel module, built for **6.1.115-haos**. Will not load on a mainline kernel. |
-| `binaries/YAopenvfD` | The vendor daemon that feeds the module its display content. |
-| `binaries/yaopenvfdctl`, `binaries/OpenVFDService`, `binaries/openvfd_chk` | Supporting vendor userspace tools. |
 
+Only text config and data files are included — no compiled vendor binaries.
 Licensing and provenance: see [`../NOTICE.md`](../NOTICE.md).
 
 ## The pins, as the vendor config states them
